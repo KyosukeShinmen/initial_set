@@ -1,34 +1,33 @@
 <?php
 
-function str_include(string $str, string $needle){
+function str_include(string $str, string $needle): bool
+{
     return (strpos($str, $needle) !== false);
 }
 
-$_ = function(string $string):string
-{
+$_ = function (string $string):string {
     return $string;
 };
 
 define("DEV", str_include($_SERVER['CONTEXT_DOCUMENT_ROOT'], "htdocs") ? true : false);
-define("DOMAIN", DEV ? "http://kaigo-town24.ts/": "https://www.kaigo-town24.jp/");
 
 class Mysql
 {
     public const DB_NAME = "luxonomy";
-    public const HOST = DEV ? "localhost" : "o4042-306.kagoya.net";
+    public const HOST = "localhost";
     public const UTF = "utf8";
-    public const USER = DEV ? "root" : "nextlife_web";
-    public const PASS = DEV ? "k-shinmen" : "JKIY3ic6";
+    public const USER = "root";
+    public const PASS = "root";
 
     public function __construct()
     {
         global $_;
         $dsn = "mysql:dbname={$_(self::DB_NAME)};host={$_(self::HOST)};charset={$_(self::UTF)}";
-        try{
-          $pdo = new PDO($dsn, self::USER, self::PASS, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES {$_(self::UTF)}"]);
-        }catch(Exception $e){
-          echo "Connection Error";
-          die();
+        try {
+            $pdo = new PDO($dsn, self::USER, self::PASS, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES {$_(self::UTF)}"]);
+        } catch (Exception $e) {
+            echo "Connection Error";
+            die();
         }
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
         $this->dbh = $pdo;
@@ -42,10 +41,11 @@ class Mysql
 
     private function toArray($array):array
     {
-        return array_map(function($row){
-            foreach($row as $key => $val)
-            if($this->isJson($val)){
-                $row[$key] = json_decode($val, true);
+        return array_map(function ($row) {
+            foreach ($row as $key => $val) {
+                if ($this->isJson($val)) {
+                    $row[$key] = json_decode($val, true);
+                }
             }
             return $row;
         }, $array);
@@ -62,7 +62,7 @@ class Mysql
     {
         $stmt = $this->dbh->prepare($sql);
         $i = 1;
-        foreach($params as $param){
+        foreach ($params as $param) {
             $stmt->bindValue($i, $param, PDO::PARAM_STR);
             ++$i;
         }
